@@ -4,27 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crossword Puzzle</title>
-    <style>
-        .crossword-container {
-            display: grid;
-            gap: 5px;
-        }
-        .crossword-cell {
-            width: 40px;
-            height: 40px;
-            text-align: center;
-            font-size: 20px;
-        }
-        .black-box {
-            background-color: black;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="crossword" class="crossword-container"></div>
-
-    <button onclick="submitCrossword()">Submit</button>
-
-    <script src="script.js"></script>
+    <h1>Crossword Puzzle</h1>
+    <label for="size">Size</label>
+    <input type="text" id="size" value="11">
+    <div class="tooltip">&#x1F6C8;
+        <span class="tooltiptext">Info</span>
+    </div>
+    <div id="message"></div>
+    <div class="parent">
+        <div id="crossword" class="crossword-container"></div>
+        <div id="clus"></div> <!-- This is where the clues will be displayed -->
+    </div>
+    <div class="box">
+        <button id="clearButton">Clear All</button>
+        <button id="Generate">Generate</button>
+        <button id="Submit">Submit</button>
+    </div>
+    <script src="cross_word.js"></script>
 </body>
 </html>
