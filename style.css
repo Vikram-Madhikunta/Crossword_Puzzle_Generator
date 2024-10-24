@@ -1,9 +1,19 @@
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+
 #crossword {
   display: grid;
   gap: 2px;
-  width: 30%;
   margin: auto;
 }
+
 .crossword-cell {
   width: 40px;
   height: 40px;
@@ -11,165 +21,635 @@
   font-size: 25px;
   border: 1px solid #000;
 }
+
 .black-box {
   background-color: black;
 }
+
 .incorrect {
   background-color: red;
   color: whitesmoke;
 }
+
 .correct {
   background-color: rgb(57, 162, 57);
   color: whitesmoke;
 }
+
+.nav {
+  height: 50px;
+}
+
+nav img {
+  height: 70px;
+}
+
 h1 {
   text-align: center;
 }
+
 #message {
   text-align: center;
   margin-top: 20px;
   font-size: 18px;
   color: green;
 }
+
 #clus {
   text-align: left;
   margin-top: 20px;
 }
+
 #clus h2 {
   margin: 5px 0;
 }
+
 #clus ul {
   list-style: none;
   padding: 0;
 }
+
 #clus ul li {
   font-size: 18px;
   margin-bottom: 5px;
 }
+
 .parent {
   display: flex;
-  width: 75%;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 1200px;
   margin: auto;
   gap: 40px;
 }
 
-#clearButton, #Submit, #Generate {
-  width: 100px;
-  height: 30px;
-  font-size: larger;
-  border-radius: 5px;
-  background-color: black;
+#clearButton, #Submit {
+  background-color: rgb(20, 20, 20);
   color: whitesmoke;
+}
+
+#Generate {
+  background-color: rgb(20, 20, 20);
+  color: whitesmoke;
+}
+
+#Generate:hover, #Submit:hover, #clearButton:hover {
+  background-color: rgb(72, 72, 72);
 }
 
 .box {
   margin: auto;
-  width: 400px;
+  width: 100%;
+  max-width: 400px;
   height: 80px;
   display: flex;
   align-items: center;
-  justify-items: center;
+  justify-content: center;
   gap: 20px;
 }
 
-/* Media Queries */
-@media screen and (max-width: 1200px) {
-  #crossword {
-    width: 50%;
-  }
+.flex-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  flex-direction: column;
+  width: 100%;
+}
 
-  .crossword-cell {
-    width: 35px;
-    height: 35px;
-    font-size: 20px;
-  }
+.top-right {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+}
 
-  #message {
-    font-size: 16px;
-  }
+.top-right form {
+  margin-right: 10px;
+}
 
-  .parent {
-    flex-direction: column;
-    width: 90%;
-  }
+.center-title {
+  text-align: center;
 }
 
 @media screen and (max-width: 800px) {
   #crossword {
-    width: 70%;
+    display: grid;
+    gap: 2px;
+    grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
   }
 
   .crossword-cell {
     width: 30px;
     height: 30px;
+    font-size: 16px;
+    border: 1px solid #000;
+  }
+
+  #clus {
+    text-align: left;
+    margin-top: 20px;
+    margin-left: 5px;
+  }
+
+  #clus h2 {
+    margin: 5px 0;
+    margin-left: 5px;
+  }
+
+  #clus ul {
+    list-style: none;
+    padding: 0;
+    margin-left: 7px;
+  }
+
+  #clus ul li {
     font-size: 18px;
+    margin-bottom: 5px;
+    margin-left: 7px;
   }
 
-  #message {
-    font-size: 14px;
+  #backToTopBtn {
+    margin-left: 10px;
   }
 
-  .parent {
-    gap: 20px;
+  .nav {
+    flex-direction: column;
+    height: auto;
   }
 
-  #clearButton, #Submit, #Generate {
-    width: 90px;
-    height: 28px;
-    font-size: medium;
+  .nav img {
+    height: 40px;
+    margin-bottom: 10px;
   }
 
-  .box {
-    width: 300px;
-    gap: 15px;
+  .nav .buttons {
+    flex-direction: column;
+    gap: 10px;
   }
+
+  .nav button {
+    width: 100%;
+    padding: 8px;
+  }
+
+  #clearButton:hover, #Submit:hover, #Generate:hover {
+    background-color: rgb(72, 72, 72);
+  }
+}
+
+.crossword-3d-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 60px);
+  grid-gap: 5px;
+}
+
+.cross-square {
+  width: 60px;
+  height: 60px;
+  background-color: #ffffff;
+  border: 2px solid #000;
+  animation: crosswordPop 1.5s infinite ease-in-out;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.cross-square:nth-child(odd) {
+  background-color: #000;
+}
+
+.cross-square:nth-child(even) {
+  background-color: #fff;
+}
+
+@keyframes crosswordPop {
+  0%, 100% {
+    transform: rotateX(0deg) translateZ(0px);
+  }
+
+  50% {
+    transform: rotateX(0deg) translateX(10px);
+  }
+}
+
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-dots {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  margin: 0 5px;
+  background-color: #000;
+  border-radius: 50%;
+  animation: dotBlink 1s infinite;
+}
+
+@keyframes dotBlink {
+  0%, 20%, 100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
+}
+
+
+
+.d-none {
+  display: none !important;
 }
 
 @media screen and (max-width: 500px) {
   #crossword {
-    width: 90%;
+    display: grid;
+    gap: 2px;
+    grid-template-columns: repeat(auto-fill, minmax(25px, 1fr));
   }
 
   .crossword-cell {
     width: 25px;
     height: 25px;
-    font-size: 16px;
+    font-size: 14px;
+    border: 1px solid #000;
   }
 
-  #message {
-    font-size: 12px;
+  #clus {
+    text-align: left;
+    margin-top: 20px;
+    margin-left: 5px;
   }
 
-  .parent {
-    gap: 15px;
+  #clus h2 {
+    margin: 5px 0;
+    margin-left: 5px;
+  }
+
+  #clus ul {
+    list-style: none;
+    padding: 0;
+    margin-left: 7px;
+  }
+
+  #clus ul li {
+    font-size: 18px;
+    margin-bottom: 5px;
+    margin-left: 7px;
+  }
+
+  #backToTopBtn {
+    display: none !important;
+  }
+
+  .nav {
+    padding: 0 10px;
+    height: 50px;
+  }
+
+  .nav img {
+    height: 5px;
+  }
+
+  .nav .buttons {
+    gap: 4px;
+  }
+
+  .nav button {
+    padding: 3px;
   }
 
   #clearButton, #Submit, #Generate {
-    width: 80px;
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  #clearButton:hover, #Submit:hover, #Generate:hover {
+    background-color: rgb(72, 72, 72);
+  }
+  .clue-number{
+    font-size: 12px;
+  }
+}
+
+@media screen and (max-width: 400px) {
+  #crossword {
+    display: grid;
+    gap: 2px;
+    grid-template-columns: repeat(auto-fill, minmax(25px, 1fr));
+    width: 50%;
+  }
+
+  .crossword-cell {
+    width: 25px;
     height: 25px;
-    font-size: small;
+    font-size: 14px;
+    border: 1px solid #000;
   }
 
-  .box {
-    width: 250px;
-    gap: 10px;
+  #backToTopBtn {
+    margin-left: 20px;
+    display: none;
+  }
+
+  .navbar .input-group {
+    gap: 3px;
+  }
+
+  .navbar input, #Generate {
+    font-size: 12px;
+    padding: 5px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .navbar .input-group {
+    gap: 1px;
+  }
+
+  .navbar input, #submitSize {
+    font-size: 7px;
+    padding: 2px;
+    width: 50px;
+    height: 30px;
+    box-sizing: border-box;
+  }
+
+  #clearButton, #Submit, #Generate {
+    width: 100%;
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  #clearButton:hover, #Submit:hover, #Generate:hover {
+    background-color: rgb(72, 72, 72);
+  }
+
+  .navbar {
+    flex-direction: column;
+    align-items: center;
+    padding: 3px 3px;
+    width: 100%;
+  }
+
+  .navbar img {
+    width: 100px;
+    height: 15px;
+    margin-bottom: 10px;
+  }
+
+  .navbar .input-group {
+    width: 60px;
+    flex-direction: column;
+    gap: 2px;
+    height: 30px;
+    margin-bottom: 3px;
   }
 }
-.crossword-cell-wrapper {
-  position: relative; /* Allows for absolute positioning of the clue number /
-  display: inline-block;
-  width: 40px; / Adjust size as needed /
-  height: 40px; / Adjust size as needed */
-}
 
-/* .crossword-cell {
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #333;
+  color: white;
   width: 100%;
-  height: 100%;
-  text-align: center;
-} */
-
-.clue-number {
-  position: absolute;
-  top: 2px;
-  left: 2px;
 }
+
+.navbar .input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar input {
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 200px;
+}
+
+@media screen and (max-width: 525px) {
+  .navbar {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 10px;
+  }
+
+
+
+  .navbar img {
+    width: 130px;
+    height: 40px;
+    margin-bottom: 10px;
+  }
+  
+  .navbar .input-group {
+    width: 60px;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+}
+  
+  .navbar input {
+    width: 60px;
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+  
+  .crossword-cell-wrapper {
+    position: relative;
+  }
+  
+  .clue-number {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+  }
+  
+  .icon-container body {
+    background-color: #f8f9fa;
+    text-align: left;
+    padding: 20px;
+  }
+  
+  .icon-container {
+    position: sticky;
+    top: 20px;
+    display: inline-block;
+    z-index: 1000;
+  }
+  
+  .tooltip-content {
+    display: none;
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    background-color: rgba(42, 40, 40, 0.826);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    width: 350px;
+    text-align: center;
+    z-index: 1;
+    text-align: left;
+  }
+  
+  .tooltip-content li {
+    margin-bottom: 10px;
+  }
+  
+  .icon-container:hover .tooltip-content {
+    display: block;
+  }
+  
+  .mt-3 {
+    margin-top: 1rem !important;
+  }
+  
+  #backToTopBtn {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    z-index: 99;
+    font-size: 18px;
+    border: none;
+    outline: none;
+    background-color: rgb(128, 125, 125);
+    color: white;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 150px;
+  }
+  
+  #backToTopBtn:hover {
+    background-color: #504d4d;
+  }
+  
+  @media screen and (max-width: 800px) {
+    #crossword {
+      grid-template-columns: repeat(12, 1fr);
+    }
+  
+    .crossword-cell {
+      width: 25px;
+      height: 25px;
+      font-size: 14px;
+    }
+  
+    .nav {
+      flex-direction: column;
+      height: auto;
+    }
+  
+    .nav img {
+      height: 40px;
+      margin-bottom: 10px;
+    }
+  
+    .nav .buttons {
+      flex-direction: column;
+      gap: 10px;
+    }
+  
+    .nav button {
+      width: 100%;
+      padding: 8px;
+    }
+  
+    #clearButton:hover, #Submit:hover, #Generate:hover {
+      background-color: rgb(72, 72, 72);
+    }
+  }
+  
+  @media screen and (max-width: 500px) {
+    #crossword {
+      grid-template-columns: repeat(8, 1fr);
+    }
+  
+    .crossword-cell {
+      width: 30px;
+      height: 30px;
+      font-size: 14px;
+    }
+  
+    .nav {
+      padding: 0 10px;
+      width: 100vw;
+    }
+  
+    .nav img {
+      height: 30px;
+    }
+  
+    .nav .buttons {
+      gap: 4px;
+    }
+  
+    .nav button {
+      padding: 5px;
+    }
+  
+    #clearButton, #Submit, #Generate {
+      width: 100%;
+      padding: 6px;
+      font-size: 12px;
+    }
+  
+    #clearButton:hover, #Submit:hover, #Generate:hover {
+      background-color: rgb(72, 72, 72);
+    }
+  }
+  
+  @media screen and (max-width: 400px) {
+    #crossword {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  
+    .crossword-cell {
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+    }
+  
+    .navbar {
+      flex-direction: column;
+      align-items: center;
+      padding: 5px;
+      width: 100vw;
+    }
+  
+    .navbar .input-group {
+      width: 100%;
+      flex-direction: column;
+      gap: 2px;
+    }
+  
+    .navbar input, #Generate {
+      font-size: 12px;
+      padding: 5px;
+      width: 100%;
+    }
+  }
+  
