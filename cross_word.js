@@ -1,3 +1,5 @@
+// const wordList = require('./data.js');
+import { wordList } from './data.js';
 class Word {
     constructor(word, clue) {
         this.word = word;
@@ -20,6 +22,18 @@ class Coordinate {
         return `(${this.row}, ${this.col})`;
     }
 }
+class Track {
+    constructor(x, y,direction,word) {
+        this.row = x;
+        this.col = y;
+        this.direction = direction;
+        this.word = word;
+    }
+
+    toString() {
+        return `(${this.row}, ${this.col})`;
+    }
+}
 
 function init(matrix) {
     for (let i = 0; i < matrix.length; i++) {
@@ -29,7 +43,9 @@ function init(matrix) {
     }
 }
 
-function checkhorizontalafter(wordList, oldword, placed, row, col, matrix, nontracklist,tracklist) {
+
+
+function checkhorizontalafter(wordList, oldword, placed, row, col, matrix, nontracklist, tracklist, horizontalCount) {
     for (let i = 0; i < oldword.length; i++) {
         const c = oldword.charAt(i);
         for (let j = 0; j < wordList.length; j++) {
@@ -42,17 +58,19 @@ function checkhorizontalafter(wordList, oldword, placed, row, col, matrix, nontr
                     const newCol = col - k;
                     if (newCol >= 0 && newCol + word.length <= matrix[0].length) {
                         if (checkhorizontal(word, row + i, newCol, matrix, nontracklist)) {
-                            placehorizontal(word, placed, row + i, newCol, matrix, nontracklist,tracklist);
-                            break;
+                            placehorizontal(word, placed, row + i, newCol, matrix, nontracklist, tracklist);
+                            horizontalCount++; // Increment horizontal count when a word is placed horizontally
+                            return { horizontalCount };
                         }
                     }
                 }
             }
         }
     }
+    return {horizontalCount} ; // Return the updated horizontalCount
 }
 
-function checkafter(wordList, oldword, placed, row, col, matrix, nontracklist,tracklist) {
+function checkafter(wordList, oldword, placed, row, col, matrix, nontracklist, tracklist, verticalCount) {
     for (let i = 0; i < oldword.length; i++) {
         const c = oldword.charAt(i);
         for (let j = 0; j < wordList.length; j++) {
@@ -65,15 +83,18 @@ function checkafter(wordList, oldword, placed, row, col, matrix, nontracklist,tr
                     const newRow = row - k;
                     if (newRow >= 0 && newRow + word.length <= matrix.length) {
                         if (checkvertical(word, newRow, col + i, matrix, nontracklist)) {
-                            placevertical(word, placed, newRow, col + i, matrix, nontracklist,tracklist);
-                            break;
+                            placevertical(word, placed, newRow, col + i, matrix, nontracklist, tracklist);
+                            verticalCount++; // Increment vertical count when a word is placed vertically
+                            return { verticalCount };
                         }
                     }
                 }
             }
         }
     }
+    return  {verticalCount }; // Return the updated verticalCount
 }
+
 
 function checkvertical(word, row, col, matrix, nontracklist) {
     if (row + word.length > matrix.length) {
@@ -160,8 +181,8 @@ function checkhorizontal(word, row, col, matrix, nontracklist) {
 
 
 function placehorizontal(word, placed, row, col, matrix, nontracklist,tracklist) {
-    if (!tracklist.includes(new Coordinate(row,col))) {
-        tracklist.push(new Coordinate(row, col));
+    if (!tracklist.includes(new Track(row,col,'horizontal',word))) {
+        tracklist.push(new Track(row, col,'horizontal',word));
       }
     
     for (let i = 0; i < word.length; i++) {
@@ -197,8 +218,8 @@ function placehorizontal(word, placed, row, col, matrix, nontracklist,tracklist)
 }
 
 function placevertical(word, placed, row, col, matrix, nontracklist,tracklist) {
-    if (!tracklist.includes(new Coordinate(row,col))) {
-        tracklist.push(new Coordinate(row, col));
+    if (!tracklist.includes(new Track(row,col,'vertical',word))) {
+        tracklist.push(new Track(row, col,'vertical',word));
       }
     for (let i = 0; i < word.length; i++) {
         matrix[row + i][col] = word.charAt(i);
@@ -236,41 +257,92 @@ function print(matrix) {
     }
 }
 
-
-const wordList = [
-    new Word("QUEUE", "A data structure that follows FIFO"),
-    new Word("SORTING", "The process of arranging elements"),
-    new Word("SETS", "A collection of unique elements"),
-    new Word("DEQUE", "A double-ended queue"),
-    new Word("CHAR", "A character data type"),
-    new Word("STACK", "A data structure that follows LIFO"),
-    new Word("TREE", "A hierarchical data structure"),
-    new Word("GREEDY", "An algorithm that makes local optimal choices"),
-    new Word("ARRAY", "A collection of elements identified by index"),
-    new Word("RECURSION", "A function that calls itself")
-];
-
-
-let size = 11;
+let size = 10;
 let tracklist = [];
 let QuestionNum = [];
-const matrix = Array.from({ length: size }, () => Array(size).fill('-'));
+let matrix = Array.from({ length: size }, () => Array(size).fill('-'));
+
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('sizeForm');
+    const sizeInput = document.getElementById('size');
+    const messageDiv = document.getElementById('message');
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault(); 
+
+        const sizeValue = parseInt(sizeInput.value); 
+
+        // Check if the screen width is less than or equal to 500px
+        const maxSize = window.innerWidth <= 500 ? 15 : 20;
+
+        if (sizeValue < 5 || sizeValue > maxSize || isNaN(sizeValue)) {
+            messageDiv.textContent = `Please enter a valid size between 5 and ${maxSize}.`;
+            messageDiv.style.color = "red";
+        } else {
+            messageDiv.textContent = `Crossword size set to: ${sizeValue} x ${sizeValue}`;
+            messageDiv.style.color = "green";
+            
+            size = sizeValue; 
+            matrix = Array.from({ length: size }, () => Array(size).fill('-'));
+            
+            main();
+        }
+    });
+
+    document.getElementById('clearButton').addEventListener('click', clearCrossword);
+    document.getElementById('Submit').addEventListener('click', submitCrossword);
+    document.getElementById('Generate').addEventListener('click', function(event) {
+        event.preventDefault();
+    
+        let sizeValue = parseInt(sizeInput.value); 
+        if (isNaN(sizeValue) || sizeValue === undefined) {
+            sizeValue = 10;
+        }
+
+        // Check if the screen width is less than or equal to 500px
+        const maxSize = window.innerWidth <= 500 ? 15 : 20;
+
+        if (sizeValue < 5 || sizeValue > maxSize) {
+            messageDiv.textContent = `Please enter a valid size between 5 and ${maxSize}.`;
+            messageDiv.style.color = "red";
+        } else {
+            messageDiv.textContent = `Crossword size set to: ${sizeValue} x ${sizeValue}`;
+            messageDiv.style.color = "green";
+            
+            size = sizeValue; 
+            matrix = Array.from({ length: size }, () => Array(size).fill('-'));
+            
+            main();   
+        }
+    });
+
+    main();
+});
+
+
 function main() {
     const random = Math.random;
     const nontracklist = [];
     const placed = [];
+     tracklist = [];
+     QuestionNum = [];
+
     wordList.sort((w1, w2) => w2.getLength() - w1.getLength());
 
     init(matrix);
 
     let row, col;
     let placedWord = false;
+    let verticalCount = 0;
+    let horizontalCount = 0; // Count the number of words placed vertically/horizontally
 
     for (let attempts = 0; attempts < 100; attempts++) {
         for (let i = 0; i < wordList.length; i++) {
-            row = Math.floor(random() * matrix.length);
-            col = Math.floor(random() * matrix[0].length);
-            const vertical = random() < 0.5;
+            // Centered placement: Try to place words more towards the center
+            row = Math.floor(matrix.length / 2) + Math.floor((random() - 0.5) * matrix.length * 0.5);
+            col = Math.floor(matrix[0].length / 2) + Math.floor((random() - 0.5) * matrix[0].length * 0.5);
+            
+            const vertical = verticalCount <= horizontalCount;  // Place vertically if vertical count is less or equal
 
             if (placed.includes(wordList[i].word)) {
                 continue;
@@ -278,59 +350,119 @@ function main() {
 
             if (vertical) {
                 if (checkvertical(wordList[i].word, row, col, matrix, nontracklist)) {
-                    placevertical(wordList[i].word, placed, row, col, matrix, nontracklist,tracklist);
-                    checkhorizontalafter(wordList, wordList[i].word, placed, row, col, matrix, nontracklist,tracklist);
+                    placevertical(wordList[i].word, placed, row, col, matrix, nontracklist, tracklist);
+                    const resultHorizontal = checkhorizontalafter(wordList, wordList[i].word, placed, row, col, matrix, nontracklist, tracklist, horizontalCount);
+                    horizontalCount = resultHorizontal.horizontalCount;
                     placedWord = true;
+                    verticalCount++;  
                     break;
                 }
             } else {
                 if (checkhorizontal(wordList[i].word, row, col, matrix, nontracklist)) {
-                    placehorizontal(wordList[i].word, placed, row, col, matrix, nontracklist,tracklist);
-                    checkafter(wordList, wordList[i].word, placed, row, col, matrix, nontracklist,tracklist);
+                    placehorizontal(wordList[i].word, placed, row, col, matrix, nontracklist, tracklist);
+                    const resultVertical = checkafter(wordList, wordList[i].word, placed, row, col, matrix, nontracklist, tracklist, verticalCount);
+                    verticalCount = resultVertical.verticalCount;
                     placedWord = true;
+                    horizontalCount++; 
                     break;
                 }
             }
         }
     }
 
+   
     if (!placedWord) {
         console.log("Failed to place the longest word.");
     }
-    
+
+   
+    analyzeAndInsertWords(wordList, placed, matrix, nontracklist, tracklist,verticalCount,horizontalCount);
+
+  
     print(matrix);
     printTracklist(tracklist);
-
-    console.log();
-    console.log();
-    console.log();
-    const booleanMatrix = convertToBooleanMatrix(matrix);
-    document.getElementById('clearButton').addEventListener('click', clearCrossword);
     
-    createCrossword(matrix, booleanMatrix,wordList,tracklist);
-    document.getElementById('Submit').addEventListener('click', submitCrossword);
-    const generateButton = document.getElementById('Generate');
-    generateButton.onclick = function() {
-      location.reload();
-    };
+    console.log();
+    console.log();
+    console.log();
+    
+    const booleanMatrix = convertToBooleanMatrix(matrix);
+    createCrossword(matrix, booleanMatrix, wordList, tracklist);
+    printQuestionNum(QuestionNum);
+
+ 
 
 }
+
 
 function convertToBooleanMatrix(matrix) {
     return matrix.map(row => row.map(cell => cell !== '-'));
 }
-
 class Coordinate1 {
-    constructor(row, col, clueNumber) {
+    constructor(row, col, clueNumber, direction, word) {
         this.row = row;
         this.col = col;
         this.clueNumber = clueNumber;
+        this.direction = direction;
+        this.word = word;
     }
 
     toString() {
-        return `(${this.row}, ${this.col}, ${this.clueNumber})`;
+        return `(${this.row}, ${this.col}, Clue Number: ${this.clueNumber}, Direction: ${this.direction}, Word: ${this.word})`;
     }
 }
+
+function analyzeAndInsertWords(wordList, placed, matrix, nontracklist, tracklist, verticalCount, horizontalCount) {
+    let canPlaceMoreWords = true;
+
+    while (canPlaceMoreWords) {
+        canPlaceMoreWords = false;  
+
+        for (let row = 0; row < matrix.length; row++) {
+            for (let col = 0; col < matrix[0].length; col++) {
+                if (matrix[row][col] === '-') {  
+
+                    for (let j = 0; j < wordList.length; j++) {
+                        const word = wordList[j].word;
+
+                        
+                        if (placed.includes(word)) {
+                            continue;
+                        }
+
+                        const vertical = verticalCount <= horizontalCount; 
+                        
+                       
+                        if (vertical) {
+                            if (checkvertical(word, row, col, matrix, nontracklist)) {
+                                placevertical(word, placed, row, col, matrix, nontracklist, tracklist);
+                                const resultHorizontal = checkhorizontalafter(wordList, word, placed, row, col, matrix, nontracklist, tracklist, horizontalCount);
+                                horizontalCount = resultHorizontal.horizontalCount; 
+                                canPlaceMoreWords = true;
+                                verticalCount++; 
+                                break;  
+                            }
+                        } else {
+                           
+                            if (checkhorizontal(word, row, col, matrix, nontracklist)) {
+                                placehorizontal(word, placed, row, col, matrix, nontracklist, tracklist);
+                                const resultVertical = checkafter(wordList, word, placed, row, col, matrix, nontracklist, tracklist, verticalCount);
+                                verticalCount = resultVertical.verticalCount; 
+                                canPlaceMoreWords = true;
+                                horizontalCount++;  
+                                break;  
+                            }
+                        }
+                    }
+
+                }
+                if (canPlaceMoreWords) break;  
+            }
+            if (canPlaceMoreWords) break;  
+        }
+    }
+}
+
 
 function createCrossword(matrix, booleanMatrix, wordList, tracklist) {
     const crosswordContainer = document.getElementById('crossword');
@@ -354,6 +486,7 @@ function createCrossword(matrix, booleanMatrix, wordList, tracklist) {
             input.type = 'text';
             input.maxLength = 1;
             input.className = 'crossword-cell';
+            // console.log(input.dataset);
             input.dataset.row = i;
             input.dataset.col = j;
 
@@ -363,7 +496,7 @@ function createCrossword(matrix, booleanMatrix, wordList, tracklist) {
                 clueSpan.className = 'clue-number';
                 clueSpan.textContent = clueNumber;
 
-                QuestionNum.push(new Coordinate1(i, j, clueNumber));
+                QuestionNum.push(new Coordinate1(i, j, clueNumber,trackItem.direction,trackItem.word));
 
                 clueNumber++;
                 cell.appendChild(clueSpan);
@@ -372,6 +505,7 @@ function createCrossword(matrix, booleanMatrix, wordList, tracklist) {
             if (!booleanMatrix[i][j]) {
                 input.classList.add('black-box');
                 input.disabled = true;
+                
             } else {
                 input.value = '';
                 input.addEventListener('keydown', (event) => handleArrowNavigation(event, i, j, booleanMatrix));
@@ -415,38 +549,76 @@ function handleArrowNavigation(event, row, col, booleanMatrix) {
     }
   }
   
+  
   function submitCrossword() {
     const inputs = document.querySelectorAll('.crossword-cell');
-    let isCorrect = true; 
+    let correctWordCount = 0; 
+    const maxlength = QuestionNum.length; 
+
+    
+    const checkedInputs = new Set();
+
+   
+    inputs.forEach((input) => {
+        input.classList.remove('correct');
+        input.classList.remove('incorrect');
+    });
 
     
     inputs.forEach((input) => {
-        const row = parseInt(input.dataset.row);
-        const col = parseInt(input.dataset.col);
+        let row = parseInt(input.dataset.row);
+        let col = parseInt(input.dataset.col);
 
-        if (!input.disabled) { 
-            if (input.value.toUpperCase() !== matrix[row][col]) { 
-                isCorrect = false;
-                input.classList.add('incorrect'); 
-            } else {
-                input.classList.remove('incorrect');
-                input.classList.add('correct');
+        let trackItem = QuestionNum.find(item => item.row === row && item.col === col);
+        if (trackItem) {
+            const word = trackItem.word.toUpperCase(); 
+            const direction = trackItem.direction;
+            let isWordCorrect = true; 
+
+            for (let i = 0; i < word.length; i++) {
+                let expectedLetter;
+                let currentInput; 
+
+                if (direction === 'horizontal') {
+                    expectedLetter = matrix[row][col + i]; 
+                    currentInput = document.querySelector(`.crossword-cell[data-row="${row}"][data-col="${col + i}"]`);
+                } else { // vertical
+                    expectedLetter = matrix[row + i][col]; 
+                    currentInput = document.querySelector(`.crossword-cell[data-row="${row + i}"][data-col="${col}"]`);
+                }
+
                 
+                if (currentInput && !currentInput.disabled) {
+                    if (expectedLetter === undefined || currentInput.value.toUpperCase() !== expectedLetter) {
+                        isWordCorrect = false; // Mark the word as incorrect
+                        currentInput.classList.add('incorrect'); // Add 'incorrect' class for wrong letters
+                        currentInput.classList.remove('correct');
+                    } else {
+                        currentInput.classList.remove('incorrect');
+                        currentInput.classList.add('correct'); // Add 'correct' class for correct letters
+                    }
+
+                    checkedInputs.add(currentInput);
+                }
+            }
+
+            if (isWordCorrect) {
+                correctWordCount++;
             }
         }
     });
 
     const messageElement = document.getElementById('message');
-    if (isCorrect) {
-        messageElement.textContent = "Correct! You've completed the crossword puzzle!";
+    if (correctWordCount === maxlength) {
+        messageElement.textContent = `Correct! You've completed the crossword puzzle!`;
         messageElement.style.color = "green";
     } else {
-        messageElement.textContent = "Some answers are incorrect. Please try again.";
-        messageElement.style.color = "red";
+        messageElement.textContent = `Some answers are incorrect. You have ${correctWordCount} out of ${maxlength} words correct.\nPlease try again.`;
+        messageElement.style.color = "red";        
     }
 }
 
-  
+
   
   function generateClues(wordList, matrix, QuestionNum) {
     const cluesContainer = document.getElementById('clus');
@@ -595,6 +767,16 @@ function handleArrowNavigation(event, row, col, booleanMatrix) {
       console.log(coord.toString()); 
     }
   }
+  function printQuestionNum(QuestionNum) {
+    if (QuestionNum.length === 0) {
+      console.log("QuestionNum is empty.");
+      return;
+    }
+  
+    console.log("QuestionNum (coordinates of the first placed word):");
+    for (const coord of QuestionNum) {
+      console.log(coord.toString()); 
+    }
+  }
 
-main();
-
+  main();
